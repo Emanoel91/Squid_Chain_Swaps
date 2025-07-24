@@ -33,7 +33,7 @@ end_date = st.date_input("End Date", value=pd.to_datetime("2025-06-01"))
 def load_weekly_path_stats(start_date, end_date):
     query = f"""
         SELECT
-            TRUNC(block_timestamp,'week') AS "Date",
+            TRUNC(block_timestamp,'month') AS "Date",
             source_chain || '➡' || destination_chain AS "Path",
             COUNT(DISTINCT sender) AS "Number of Swappers",
             ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0)) AS "Avg Swap per Swapper"
@@ -82,17 +82,17 @@ fig_stacked = px.bar(
     x="Date",
     y="Number of Swappers",
     color="Path",
-    title="Weekly Number of Swappers By Path"
+    title="Monthly Number of Swappers By Path"
 )
 fig_stacked.update_layout(barmode="stack", yaxis_title="Number of Swappers")
 
-# --- Line Chart: Weekly Average Swap Count per Swapper by Path ---
+# --- Line Chart: Monthly Average Swap Count per Swapper by Path ---
 fig_line = px.line(
     weekly_path_stats,
     x="Date",
     y="Avg Swap per Swapper",
     color="Path",
-    title="Weekly Average Swap Count per Swapper By Path"
+    title="Monthly Average Swap Count per Swapper By Path"
 )
 fig_line.update_layout(yaxis_title="Avg Swap per Swapper")
 
