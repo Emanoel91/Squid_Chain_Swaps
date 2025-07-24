@@ -233,7 +233,7 @@ fig_dest.update_layout(
     barmode="group",
     title="Total Number of Swappers and Swaps By Destination Chain",
     xaxis_title="Destination Chain",
-    yaxis_title="Count"
+    yaxis_title=" "
 )
 
 fig_source = go.Figure(data=[
@@ -244,7 +244,7 @@ fig_source.update_layout(
     barmode="group",
     title="Total Number of Swappers and Swaps By Source Chain",
     xaxis_title="Source Chain",
-    yaxis_title="Count"
+    yaxis_title=" "
 )
 
 # --- Display both charts in one row ---
