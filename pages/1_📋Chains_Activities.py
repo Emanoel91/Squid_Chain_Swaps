@@ -89,10 +89,62 @@ def load_weekly_swaps_swappers(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 3: Overview of Chains ---
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Overview of Chains</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- Query 1: By Destination Chain ---
+@st.cache_data
+def load_swaps_by_destination(start_date, end_date):
+    query = f"""
+    WITH tbl AS (
+        SELECT destination_chain, source_chain, tx_hash, sender, amount, receiver
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+    )
+    SELECT destination_chain AS "Destination Chain",
+           COUNT(DISTINCT tx_hash) AS "Total Swaps",
+           COUNT(DISTINCT sender) AS "Total Swappers"
+    FROM tbl
+    GROUP BY 1
+    ORDER BY 3 DESC
+    LIMIT 10
+    """
+    return pd.read_sql(query, conn)
+
+# --- Query: By Source Chain ---
+@st.cache_data
+def load_swaps_by_source(start_date, end_date):
+    query = f"""
+    WITH tbl AS (
+        SELECT destination_chain, source_chain, tx_hash, sender, amount, receiver
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+    )
+    SELECT source_chain AS "Source Chain",
+           COUNT(DISTINCT tx_hash) AS "Total Swaps",
+           COUNT(DISTINCT sender) AS "Total Swappers"
+    FROM tbl
+    GROUP BY 1
+    ORDER BY 3 DESC
+    LIMIT 10
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 swap_stats = load_swap_stats(start_date, end_date)
 weekly_new_swappers = load_weekly_new_swappers(start_date, end_date)
 weekly_swaps_swappers = load_weekly_swaps_swappers(start_date, end_date)
+dest_chain_stats = load_swaps_by_destination(start_date, end_date)
+source_chain_stats = load_swaps_by_source(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -154,3 +206,31 @@ fig2.update_layout(
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig1, use_container_width=True)
 col2.plotly_chart(fig2, use_container_width=True)
+
+# --- Row 3 ------
+fig_dest = go.Figure(data=[
+    go.Bar(name="Total Swaps", x=dest_chain_stats["Destination Chain"], y=dest_chain_stats["Total Swaps"]),
+    go.Bar(name="Total Swappers", x=dest_chain_stats["Destination Chain"], y=dest_chain_stats["Total Swappers"])
+])
+fig_dest.update_layout(
+    barmode="group",
+    title="Total Number of Swappers and Swaps By Destination Chain",
+    xaxis_title="Destination Chain",
+    yaxis_title="Count"
+)
+
+fig_source = go.Figure(data=[
+    go.Bar(name="Total Swaps", x=source_chain_stats["Source Chain"], y=source_chain_stats["Total Swaps"]),
+    go.Bar(name="Total Swappers", x=source_chain_stats["Source Chain"], y=source_chain_stats["Total Swappers"])
+])
+fig_source.update_layout(
+    barmode="group",
+    title="Total Number of Swappers and Swaps By Source Chain",
+    xaxis_title="Source Chain",
+    yaxis_title="Count"
+)
+
+# --- Display both charts in one row ---
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig_dest, use_container_width=True)
+col2.plotly_chart(fig_source, use_container_width=True)
