@@ -141,7 +141,7 @@ source_chain_stats = load_swaps_by_source(start_date, end_date)
 # --- Row 1: Metrics ---
 st.markdown(
     """
-    <div style="background-color:#e6fa36; padding:2px; border-radius:10px;">
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
         <h2 style="color:#000000; text-align:center;">Overall Stats of Chains</h2>
     </div>
     """,
