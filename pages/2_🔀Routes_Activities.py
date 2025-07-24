@@ -61,9 +61,27 @@ def load_top_paths_stats(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 3: Monthly Number of Swaps by Path ---
+
+@st.cache_data
+def load_monthly_swaps_by_path(start_date, end_date):
+    query = f"""
+        SELECT
+            TRUNC(block_timestamp, 'month') AS "Date",
+            source_chain || '➡' || destination_chain AS "Path",
+            COUNT(DISTINCT tx_hash) AS "Number of Swaps"
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+        GROUP BY 1, 2
+        ORDER BY 1
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 weekly_path_stats = load_weekly_path_stats(start_date, end_date)
 top_paths_stats = load_top_paths_stats(start_date, end_date)
+monthly_swaps_path = load_monthly_swaps_by_path(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -126,3 +144,54 @@ top_paths_stats.index = range(1, len(top_paths_stats) + 1)
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_horizontal, use_container_width=True)
 col2.dataframe(top_paths_stats, use_container_width=True, height=500)
+
+# --- Row 3 ----
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Swaps (Transactions)</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- Stacked Bar Chart ---
+fig_stacked_bar = px.bar(
+    monthly_swaps_path,
+    x="Date",
+    y="Number of Swaps",
+    color="Path",
+    title="Monthly Number of Swaps By Path",
+    barmode="stack"
+)
+fig_stacked_bar.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Number of Swaps",
+    legend_title="Path",
+    height=500
+)
+
+# --- Normalized Area Chart ---
+
+normalized_df = monthly_swaps_path.copy()
+normalized_df["Total per Date"] = normalized_df.groupby("Date")["Number of Swaps"].transform("sum")
+normalized_df["Percentage"] = normalized_df["Number of Swaps"] / normalized_df["Total per Date"] * 100
+
+fig_area_normalized = px.area(
+    normalized_df,
+    x="Date",
+    y="Percentage",
+    color="Path",
+    groupnorm="percent",
+    title="Monthly Number of Swaps By Path (%Normalized)"
+)
+fig_area_normalized.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Percentage (%)",
+    legend_title="Path",
+    height=500
+)
+
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig_stacked_bar, use_container_width=True)
+col2.plotly_chart(fig_area_normalized, use_container_width=True)
