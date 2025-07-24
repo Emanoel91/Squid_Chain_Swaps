@@ -16,7 +16,7 @@ interactions across multiple blockchains. Squid enables users to swap any token 
 """)
 
 # --- Display Image ---
-st.image("https://i.postimg.cc/s2HY308v/axelar.jpg", caption="", use_container_width=True)
+#st.image("https://i.postimg.cc/s2HY308v/axelar.jpg", caption="", use_container_width=True)
 
 st.markdown("""
 https://www.axelar.network/
