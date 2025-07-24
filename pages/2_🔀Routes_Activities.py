@@ -101,18 +101,18 @@ col1, col2 = st.columns(2)
 col1.plotly_chart(fig_stacked, use_container_width=True)
 col2.plotly_chart(fig_line, use_container_width=True)
 
-# --- Row 4 --------
+# --- Row 2 --------
 
 top_10_paths = top_paths_stats.head(10)
 
 # --- Horizontal Bar Chart ---
 fig_horizontal = px.bar(
-    top_10_paths.sort_values("Number of Swappers"),  
+    top_10_paths.sort_values("Number of Swappers"),  # معکوس برای نمایش بهتر
     x="Number of Swappers",
     y="Path",
     orientation="h",
     text="Number of Swappers",
-    title="🏆Top 10 Bridge Path By Number of Swappers"
+    title="Top 10 Paths by Number of Swappers"
 )
 fig_horizontal.update_traces(textposition="outside")
 fig_horizontal.update_layout(
@@ -120,6 +120,8 @@ fig_horizontal.update_layout(
     yaxis_title="Path",
     height=500
 )
+
+top_paths_stats.index = range(1, len(top_paths_stats) + 1)
 
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_horizontal, use_container_width=True)
