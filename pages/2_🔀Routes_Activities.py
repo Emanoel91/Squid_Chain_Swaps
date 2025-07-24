@@ -36,7 +36,7 @@ def load_weekly_path_stats(start_date, end_date):
             TRUNC(block_timestamp,'week') AS "Date",
             source_chain || '➡' || destination_chain AS "Path",
             COUNT(DISTINCT sender) AS "Number of Swappers",
-            ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0), 2) AS "Avg Swap per Swapper"
+            ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0)) AS "Avg Swap per Swapper"
         FROM axelar.defi.ez_bridge_squid
         WHERE block_timestamp::date >= '{start_date}'
           AND block_timestamp::date <= '{end_date}'
