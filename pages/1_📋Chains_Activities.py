@@ -11,9 +11,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Wide Layout ---
-st.set_page_config(layout="wide")
-
 st.title("📋Chains Activities")
 
 # --- Snowflake Connection ---
@@ -27,12 +24,10 @@ conn = snowflake.connector.connect(
 )
 
 # --- Time Frame & Period Selection ---
-#timeframe = st.selectbox("Select Time Frame", ["day", "week", "month"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2022-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-06-01"))
 
 # --- Query Functions ---------------------------------------------------------------------------------------
-# --- Row 1: Swap Statistics ---
 @st.cache_data
 def load_swap_stats(start_date, end_date):
     query = f"""
@@ -46,18 +41,15 @@ def load_swap_stats(start_date, end_date):
         block_timestamp::date >= '{start_date}'
         AND block_timestamp::date <= '{end_date}'
     """
-    return pd.read_sql(query, conn).iloc[0]
-
+    df = pd.read_sql(query, conn)
+    df.columns = df.columns.str.lower() 
+    return df.iloc[0]
 
 # --- Load Data ----------------------------------------------------------------------------------------
 swap_stats = load_swap_stats(start_date, end_date)
-
-# --- Row Data ------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
 col1, col2, col3 = st.columns(3)
 col1.metric("Total number of swaps", f"{swap_stats['total_swaps']:,}")
 col2.metric("Total number of swappers", f"{swap_stats['total_swapper']:,}")
 col3.metric("Average number of swapped per user", f"{swap_stats['avg_number_swaped_per_user']:.2f}")
-
-
