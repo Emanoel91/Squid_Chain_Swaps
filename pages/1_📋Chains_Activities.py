@@ -121,8 +121,8 @@ fig1.add_trace(go.Scatter(
 fig1.update_layout(
     title="Weekly Number of New Swappers and Cumulative Number of New Swappers",
     xaxis=dict(title="Week"),
-    yaxis=dict(title="New Swappers", side="left"),
-    yaxis2=dict(title="Cumulative New Swappers", overlaying="y", side="right"),
+    yaxis=dict(title="Address count", side="left"),
+    yaxis2=dict(title="Address count", overlaying="y", side="right"),
     legend=dict(x=0.01, y=0.99)
 )
 
@@ -145,8 +145,8 @@ fig2.add_trace(go.Scatter(
 fig2.update_layout(
     title="Weekly Number of Swaps & Swappers",
     xaxis=dict(title="Week"),
-    yaxis=dict(title="Number of Swaps", side="left"),
-    yaxis2=dict(title="Number of Swappers", overlaying="y", side="right"),
+    yaxis=dict(title="Txn count", side="left"),
+    yaxis2=dict(title="Address count", overlaying="y", side="right"),
     legend=dict(x=0.01, y=0.99)
 )
 
