@@ -90,16 +90,7 @@ def load_weekly_swaps_swappers(start_date, end_date):
     return pd.read_sql(query, conn)
 
 # --- Row 3: Overview of Chains ---
-st.markdown(
-    """
-    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
-        <h2 style="color:#000000; text-align:center;">Overview of Chains</h2>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- Query 1: By Destination Chain ---
+# --- Query: By Destination Chain ---
 @st.cache_data
 def load_swaps_by_destination(start_date, end_date):
     query = f"""
@@ -148,12 +139,29 @@ source_chain_stats = load_swaps_by_source(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:10px; border-radius:5px;">
+        <h2 style="color:#000000; text-align:center;">Overall Stats of Chains</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 col1, col2, col3 = st.columns(3)
 col1.metric("Total number of swaps", f"{swap_stats['total_swaps']:,}")
 col2.metric("Total number of swappers", f"{swap_stats['total_swapper']:,}")
 col3.metric("Average number of swapped per user", f"{swap_stats['avg_number_swaped_per_user']:.2f}")
 
 # --- Row 2 ------------
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Swaps & Swappers</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 fig1 = go.Figure()
 fig1.add_bar(
     x=weekly_new_swappers["Week"],
@@ -208,6 +216,15 @@ col1.plotly_chart(fig1, use_container_width=True)
 col2.plotly_chart(fig2, use_container_width=True)
 
 # --- Row 3 ------
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Overview of Chains</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 fig_dest = go.Figure(data=[
     go.Bar(name="Total Swaps", x=dest_chain_stats["Destination Chain"], y=dest_chain_stats["Total Swaps"]),
     go.Bar(name="Total Swappers", x=dest_chain_stats["Destination Chain"], y=dest_chain_stats["Total Swappers"])
