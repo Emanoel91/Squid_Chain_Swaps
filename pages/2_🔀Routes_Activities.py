@@ -94,11 +94,34 @@ def load_paths_by_swaps(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 5: Top 10 Swappers by Most Number of Swaps ---
+
+@st.cache_data
+def load_top_swappers(start_date, end_date):
+    query = f"""
+        SELECT
+            sender AS "👨‍💻Swapper",
+            COUNT(DISTINCT tx_hash) AS "🔄# of Swaps",
+            COUNT(DISTINCT (source_chain || '➡' || destination_chain)) AS "🔀# of Paths",
+            COUNT(DISTINCT source_chain) AS "📤# of Source Chains",
+            COUNT(DISTINCT destination_chain) AS "📥# of Destination Chains",
+            COUNT(DISTINCT token_address) AS "🔘# of Tokens",
+            COUNT(DISTINCT block_timestamp::date) AS "📅# of Days of Activity"
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+        GROUP BY 1
+        ORDER BY 2 DESC
+        LIMIT 10
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 weekly_path_stats = load_weekly_path_stats(start_date, end_date)
 top_paths_stats = load_top_paths_stats(start_date, end_date)
 monthly_swaps_path = load_monthly_swaps_by_path(start_date, end_date)
 paths_swaps_df = load_paths_by_swaps(start_date, end_date)
+top_swappers_df = load_top_swappers(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -240,3 +263,33 @@ paths_swaps_df_display.index = range(1, len(paths_swaps_df_display) + 1)
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_top10_paths, use_container_width=True)
 col2.dataframe(paths_swaps_df_display, use_container_width=True, height=500)
+
+# --- Row 5 -------------
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Top Swappers</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+top_swappers_df_display = top_swappers_df.copy()
+top_swappers_df_display.index = range(1, len(top_swappers_df_display) + 1)
+
+# gold/silver/bronze colors
+def highlight_top3(row):
+    color = ''
+    if row.name == 1:
+        color = 'background-color: gold'
+    elif row.name == 2:
+        color = 'background-color: silver'
+    elif row.name == 3:
+        color = 'background-color: #cd7f32'  # bronze
+    return [color] * len(row)
+
+st.subheader("Top 10 Swappers By Most Number of Swap")
+st.dataframe(
+    top_swappers_df_display.style.apply(highlight_top3, axis=1),
+    use_container_width=True,
+    height=500
+)
