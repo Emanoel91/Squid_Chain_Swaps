@@ -45,11 +45,112 @@ def load_swap_stats(start_date, end_date):
     df.columns = df.columns.str.lower() 
     return df.iloc[0]
 
+# --- Row 2: Weekly New Swappers and Cumulative ---
+@st.cache_data
+def load_weekly_new_swappers(start_date, end_date):
+    query = f"""
+    WITH users AS (
+        SELECT block_timestamp, sender AS user
+        FROM axelar.defi.ez_bridge_squid
+        
+    ),
+    new_user AS (
+        SELECT MIN(block_timestamp::date) AS date, user
+        FROM users 
+        GROUP BY 2
+    )
+    SELECT TRUNC(date, 'week') AS "Week",
+           COUNT(DISTINCT user) AS "New Swappers",
+           SUM(COUNT(DISTINCT user)) OVER (ORDER BY TRUNC(date, 'week') ASC) AS "Cumulative New Swappers"
+    FROM new_user
+    WHERE date >= '{start_date}'
+          AND date <= '{end_date}'
+    GROUP BY 1
+    ORDER BY 1
+    """
+    return pd.read_sql(query, conn)
+    
+# --- Weekly Number of Swaps & Swappers ---
+@st.cache_data
+def load_weekly_swaps_swappers(start_date, end_date):
+    query = f"""
+    SELECT
+        DATE_TRUNC('WEEK', BLOCK_TIMESTAMP) AS "Week",
+        COUNT(DISTINCT tx_hash) AS "Number of Swaps",
+        COUNT(DISTINCT sender) AS "Number of Swappers",
+        ROUND(COUNT(DISTINCT tx_hash)::numeric / NULLIF(COUNT(DISTINCT sender), 0), 2) AS "Avg Swap per Swapper"
+    FROM
+        axelar.defi.ez_bridge_squid
+    WHERE
+        block_timestamp::date >= '{start_date}'
+        AND block_timestamp::date <= '{end_date}'
+    GROUP BY 1
+    ORDER BY 1
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 swap_stats = load_swap_stats(start_date, end_date)
+weekly_new_swappers = load_weekly_new_swappers(start_date, end_date)
+weekly_swaps_swappers = load_weekly_swaps_swappers(start_date, end_date)
+# ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
 col1, col2, col3 = st.columns(3)
 col1.metric("Total number of swaps", f"{swap_stats['total_swaps']:,}")
 col2.metric("Total number of swappers", f"{swap_stats['total_swapper']:,}")
 col3.metric("Average number of swapped per user", f"{swap_stats['avg_number_swaped_per_user']:.2f}")
+
+# --- Row 2 ------------
+fig1 = go.Figure()
+fig1.add_bar(
+    x=weekly_new_swappers["Week"],
+    y=weekly_new_swappers["New Swappers"],
+    name="New Swappers",
+    marker_color="steelblue",
+    yaxis="y1"
+)
+fig1.add_trace(go.Scatter(
+    x=weekly_new_swappers["Week"],
+    y=weekly_new_swappers["Cumulative New Swappers"],
+    name="Cumulative New Swappers",
+    mode="lines+markers",
+    line=dict(color="orange", width=2),
+    yaxis="y2"
+))
+fig1.update_layout(
+    title="Weekly Number of New Swappers and Cumulative Number of New Swappers",
+    xaxis=dict(title="Week"),
+    yaxis=dict(title="New Swappers", side="left"),
+    yaxis2=dict(title="Cumulative New Swappers", overlaying="y", side="right"),
+    legend=dict(x=0.01, y=0.99)
+)
+
+fig2 = go.Figure()
+fig2.add_bar(
+    x=weekly_swaps_swappers["Week"],
+    y=weekly_swaps_swappers["Number of Swaps"],
+    name="Number of Swaps",
+    marker_color="teal",
+    yaxis="y1"
+)
+fig2.add_trace(go.Scatter(
+    x=weekly_swaps_swappers["Week"],
+    y=weekly_swaps_swappers["Number of Swappers"],
+    name="Number of Swappers",
+    mode="lines+markers",
+    line=dict(color="firebrick", width=2),
+    yaxis="y2"
+))
+fig2.update_layout(
+    title="Weekly Number of Swaps & Swappers",
+    xaxis=dict(title="Week"),
+    yaxis=dict(title="Number of Swaps", side="left"),
+    yaxis2=dict(title="Number of Swappers", overlaying="y", side="right"),
+    legend=dict(x=0.01, y=0.99)
+)
+
+# --- Display both charts in one row ---
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig1, use_container_width=True)
+col2.plotly_chart(fig2, use_container_width=True)
