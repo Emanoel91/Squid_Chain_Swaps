@@ -29,45 +29,35 @@ conn = snowflake.connector.connect(
 # --- Time Frame & Period Selection ---
 #timeframe = st.selectbox("Select Time Frame", ["day", "week", "month"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2022-01-01"))
-end_date = st.date_input("End Date", value=pd.to_datetime("2025-01-01"))
+end_date = st.date_input("End Date", value=pd.to_datetime("2025-06-01"))
 
 # --- Query Functions ---------------------------------------------------------------------------------------
+# --- Row 1: Swap Statistics ---
 @st.cache_data
-def load_blocks_stats_filtered(start_date, end_date):
+def load_swap_stats(start_date, end_date):
     query = f"""
-    SELECT COUNT(DISTINCT fact_blocks_id) AS "Blocks Count",
-           ROUND(AVG(tx_count)) AS "Average TX per Block"
-    FROM axelar.core.fact_blocks
-    WHERE block_timestamp::date >= '{start_date}'
-      AND block_timestamp::date <= '{end_date}'
+    SELECT
+        COUNT(DISTINCT tx_hash) AS total_swaps,
+        COUNT(DISTINCT sender) AS total_swapper,
+        ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0), 2) AS avg_number_swaped_per_user
+    FROM
+        axelar.defi.ez_bridge_squid
+    WHERE
+        block_timestamp::date >= '{start_date}'
+        AND block_timestamp::date <= '{end_date}'
     """
     return pd.read_sql(query, conn).iloc[0]
-
-@st.cache_data
-def load_blocks_stats_last24h():
-    query = """
-    SELECT COUNT(DISTINCT fact_blocks_id) AS "Blocks Count",
-           round(AVG(tx_count)) AS "Average TX per Block"
-    FROM axelar.core.fact_blocks
-    WHERE block_timestamp::date >= current_date - 1
-    """
-    return pd.read_sql(query, conn).iloc[0]
-
-
 
 
 # --- Load Data ----------------------------------------------------------------------------------------
-blocks_stats_filtered = load_blocks_stats_filtered(start_date, end_date)
-blocks_stats_last24h = load_blocks_stats_last24h()
-
+swap_stats = load_swap_stats(start_date, end_date)
 
 # --- Row Data ------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Number of Blocks Generated", f"{blocks_stats_filtered['Blocks Count']:,}")
-col2.metric("Avg Txn Count per Block", f"{blocks_stats_filtered['Average TX per Block']:.0f}")
-col3.metric("Number of Blocks Generated (Last 24h)", f"{blocks_stats_last24h['Blocks Count']:,}")
-col4.metric("Avg Txn Count per Block (Last 24h)", f"{blocks_stats_last24h['Average TX per Block']:.2f}")
+col1, col2, col3 = st.columns(3)
+col1.metric("Total number of swaps", f"{swap_stats['total_swaps']:,}")
+col2.metric("Total number of swappers", f"{swap_stats['total_swapper']:,}")
+col3.metric("Average number of swapped per user", f"{swap_stats['avg_number_swaped_per_user']:.2f}")
 
 
