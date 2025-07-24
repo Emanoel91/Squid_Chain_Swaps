@@ -155,7 +155,7 @@ col3.metric("Average number of swapped per user", f"{swap_stats['avg_number_swap
 # --- Row 2 ------------
 st.markdown(
     """
-    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
         <h2 style="color:#000000; text-align:center;">Swaps & Swappers</h2>
     </div>
     """,
@@ -218,7 +218,7 @@ col2.plotly_chart(fig2, use_container_width=True)
 # --- Row 3 ------
 st.markdown(
     """
-    <div style="background-color:#e6fa36; padding:10px; border-radius:10px;">
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
         <h2 style="color:#000000; text-align:center;">Overview of Chains</h2>
     </div>
     """,
