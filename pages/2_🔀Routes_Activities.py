@@ -45,9 +45,25 @@ def load_weekly_path_stats(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 2: Top Paths by Number of Swappers ---
+@st.cache_data
+def load_top_paths_stats(start_date, end_date):
+    query = f"""
+        SELECT
+            source_chain || '➡' || destination_chain AS "Path",
+            COUNT(DISTINCT sender) AS "Number of Swappers",
+            ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0)) AS "Avg Swap per Swapper"
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+        GROUP BY 1
+        ORDER BY "Number of Swappers" DESC
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 weekly_path_stats = load_weekly_path_stats(start_date, end_date)
-
+top_paths_stats = load_top_paths_stats(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -84,3 +100,27 @@ fig_line.update_layout(yaxis_title="Avg Swap per Swapper")
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_stacked, use_container_width=True)
 col2.plotly_chart(fig_line, use_container_width=True)
+
+# --- Row 4 --------
+
+top_10_paths = top_paths_stats.head(10)
+
+# --- Horizontal Bar Chart ---
+fig_horizontal = px.bar(
+    top_10_paths.sort_values("Number of Swappers"),  # معکوس برای نمایش بهتر
+    x="Number of Swappers",
+    y="Path",
+    orientation="h",
+    text="Number of Swappers",
+    title="Top 10 Paths by Number of Swappers"
+)
+fig_horizontal.update_traces(textposition="outside")
+fig_horizontal.update_layout(
+    xaxis_title="Number of Swappers",
+    yaxis_title="Path",
+    height=500
+)
+
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig_horizontal, use_container_width=True)
+col2.dataframe(top_paths_stats, use_container_width=True, height=500)
