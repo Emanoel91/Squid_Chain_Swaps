@@ -130,12 +130,46 @@ def load_swaps_by_source(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 4: Distribution of Swappers by Number of Swaps ---
+@st.cache_data
+def load_swappers_distribution(start_date, end_date):
+    query = f"""
+    WITH tbl AS (
+        SELECT
+            sender,
+            COUNT(DISTINCT tx_hash) AS count_TXs,
+            CASE 
+                WHEN COUNT(DISTINCT tx_hash) = 1 THEN 'Only 1 Transactions'
+                WHEN COUNT(DISTINCT tx_hash) > 1 AND COUNT(DISTINCT tx_hash) <= 5 THEN '(1-5] Transactions'
+                WHEN COUNT(DISTINCT tx_hash) > 5 AND COUNT(DISTINCT tx_hash) <= 10 THEN '(5-10] Transactions'
+                WHEN COUNT(DISTINCT tx_hash) > 10 AND COUNT(DISTINCT tx_hash) <= 20 THEN '(10-20] Transactions'
+                WHEN COUNT(DISTINCT tx_hash) > 20 AND COUNT(DISTINCT tx_hash) <= 50 THEN '(20-50] Transactions'
+                ELSE '50+ Transactions' 
+            END AS type
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+        GROUP BY 1
+    )
+    SELECT
+        type AS "Number of Swaps",
+        COUNT(DISTINCT t1.sender) AS "Number of Swappers"
+    FROM axelar.defi.ez_bridge_squid t1 
+    JOIN tbl t2 ON t1.sender = t2.sender
+    WHERE t1.block_timestamp::date >= '{start_date}'
+      AND t1.block_timestamp::date <= '{end_date}'
+    GROUP BY 1
+    ORDER BY 2 DESC
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 swap_stats = load_swap_stats(start_date, end_date)
 weekly_new_swappers = load_weekly_new_swappers(start_date, end_date)
 weekly_swaps_swappers = load_weekly_swaps_swappers(start_date, end_date)
 dest_chain_stats = load_swaps_by_destination(start_date, end_date)
 source_chain_stats = load_swaps_by_source(start_date, end_date)
+swappers_distribution = load_swappers_distribution(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -251,3 +285,37 @@ fig_source.update_layout(
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_dest, use_container_width=True)
 col2.plotly_chart(fig_source, use_container_width=True)
+
+# --- Row 4 ---------------
+st.markdown(
+    """
+    <div style="background-color:#e6fa36; padding:1px; border-radius:10px;">
+        <h2 style="color:#000000; text-align:center;">Distribution</h2>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# --- Donut Chart ---
+fig_donut = px.pie(
+    swappers_distribution, 
+    names="Number of Swaps", 
+    values="Number of Swappers", 
+    hole=0.4,
+    title="Share of Swappers By Number of Swaps"
+)
+
+# --- Bar Chart ---
+fig_bar = px.bar(
+    swappers_distribution, 
+    x="Number of Swaps", 
+    y="Number of Swappers", 
+    text="Number of Swappers", 
+    title="Distribution of Swappers By Number of Swaps"
+)
+fig_bar.update_traces(textposition="outside")
+fig_bar.update_layout(yaxis_title="Number of Swappers")
+
+# --- Display in one row ---
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig_donut, use_container_width=True)
+col2.plotly_chart(fig_bar, use_container_width=True)
