@@ -107,12 +107,12 @@ top_10_paths = top_paths_stats.head(10)
 
 # --- Horizontal Bar Chart ---
 fig_horizontal = px.bar(
-    top_10_paths.sort_values("Number of Swappers"),  # معکوس برای نمایش بهتر
+    top_10_paths.sort_values("Number of Swappers"),  
     x="Number of Swappers",
     y="Path",
     orientation="h",
     text="Number of Swappers",
-    title="Top 10 Paths by Number of Swappers"
+    title="🏆Top 10 Paths by Number of Swappers"
 )
 fig_horizontal.update_traces(textposition="outside")
 fig_horizontal.update_layout(
