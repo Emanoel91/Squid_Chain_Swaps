@@ -78,10 +78,27 @@ def load_monthly_swaps_by_path(start_date, end_date):
     """
     return pd.read_sql(query, conn)
 
+# --- Row 4: Top 10 Paths by Number of Swaps ---
+
+@st.cache_data
+def load_paths_by_swaps(start_date, end_date):
+    query = f"""
+        SELECT
+            source_chain || '➡' || destination_chain AS "Path",
+            COUNT(DISTINCT tx_hash) AS "Number of Swaps"
+        FROM axelar.defi.ez_bridge_squid
+        WHERE block_timestamp::date >= '{start_date}'
+          AND block_timestamp::date <= '{end_date}'
+        GROUP BY 1
+        ORDER BY 2 DESC
+    """
+    return pd.read_sql(query, conn)
+
 # --- Load Data ----------------------------------------------------------------------------------------
 weekly_path_stats = load_weekly_path_stats(start_date, end_date)
 top_paths_stats = load_top_paths_stats(start_date, end_date)
 monthly_swaps_path = load_monthly_swaps_by_path(start_date, end_date)
+paths_swaps_df = load_paths_by_swaps(start_date, end_date)
 # ------------------------------------------------------------------------------------------------------
 
 # --- Row 1: Metrics ---
@@ -195,3 +212,31 @@ fig_area_normalized.update_layout(
 col1, col2 = st.columns(2)
 col1.plotly_chart(fig_stacked_bar, use_container_width=True)
 col2.plotly_chart(fig_area_normalized, use_container_width=True)
+
+# --- Row 4 -------------
+# --- Top 10 Paths for Chart ---
+top10_paths = paths_swaps_df.head(10)
+
+fig_top10_paths = px.bar(
+    top10_paths.sort_values("Number of Swaps"),
+    x="Number of Swaps",
+    y="Path",
+    orientation='h',
+    text="Number of Swaps",
+    title="🏆Top 10 Paths By Number of Swaps"
+)
+fig_top10_paths.update_traces(texttemplate='%{text:,}', textposition='outside')
+fig_top10_paths.update_layout(
+    xaxis_title="Number of Swaps",
+    yaxis_title="Path",
+    height=500,
+    margin=dict(l=10, r=10, t=50, b=10)
+)
+
+# --- Table with index starting from 1 ---
+paths_swaps_df_display = paths_swaps_df.copy()
+paths_swaps_df_display.index = range(1, len(paths_swaps_df_display) + 1)
+
+col1, col2 = st.columns(2)
+col1.plotly_chart(fig_top10_paths, use_container_width=True)
+col2.dataframe(paths_swaps_df_display, use_container_width=True, height=500)
