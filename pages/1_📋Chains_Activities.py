@@ -34,7 +34,7 @@ def load_swap_stats(start_date, end_date):
     SELECT
         COUNT(DISTINCT tx_hash) AS total_swaps,
         COUNT(DISTINCT sender) AS total_swapper,
-        ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0), 2) AS avg_number_swaped_per_user
+        ROUND(COUNT(DISTINCT tx_hash) / NULLIF(COUNT(DISTINCT sender), 0)) AS avg_number_swaped_per_user
     FROM
         axelar.defi.ez_bridge_squid
     WHERE
