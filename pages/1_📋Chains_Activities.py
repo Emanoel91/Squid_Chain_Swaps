@@ -14,9 +14,12 @@ st.set_page_config(
 st.title("📋Chains Activities")
 
 st.info(
-    "🔔Charts initially display data for a default time range. Select a custom range to view results for your desired period.
+    "🔔Charts initially display data for a default time range. Select a custom range to view results for your desired period."
 
-     ⏳On-chain data retrieval may take a few moments. Please wait while the results load."
+)
+
+st.info(
+    "⏳On-chain data retrieval may take a few moments. Please wait while the results load."
 )
 
 # --- Snowflake Connection ---
