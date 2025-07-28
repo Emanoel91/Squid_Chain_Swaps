@@ -21,7 +21,7 @@ st.markdown(
 # --- Info Box ---
 st.markdown(
     """
-    <div style="background-color: #fff8cc; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
+    <div style="background-color: #e6fa36; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
         Squid Router is a cross-chain liquidity and messaging protocol built on the Axelar Network, designed to facilitate seamless token swaps, 
         transfers, and smart contract interactions across multiple blockchains. 
         Squid enables users to swap any token across over 90 blockchains (e.g., Ethereum, Polygon, Arbitrum, Solana, Bitcoin) in a single click.
