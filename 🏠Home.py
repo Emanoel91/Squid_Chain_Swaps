@@ -7,24 +7,67 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- Title with Logo ---
+st.markdown(
+    """
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="https://axelarscan.io/logos/accounts/squid.svg" alt="Squid Logo" style="width:60px; height:60px;">
+        <h1 style="margin: 0;">Squid: Chain Swaps</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-st.title("🟡Squid: Chain Swaps")
+# --- Info Box ---
+st.markdown(
+    """
+    <div style="background-color: #fff8cc; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
+        Squid Router is a cross-chain liquidity and messaging protocol built on the Axelar Network, designed to facilitate seamless token swaps, 
+        transfers, and smart contract interactions across multiple blockchains. 
+        Squid enables users to swap any token across over 90 blockchains (e.g., Ethereum, Polygon, Arbitrum, Solana, Bitcoin) in a single click.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-st.markdown("""
-Squid Router is a cross-chain liquidity and messaging protocol built on the Axelar Network, designed to facilitate seamless token swaps, transfers, and smart contract 
-interactions across multiple blockchains. Squid enables users to swap any token across over 90 blockchains (e.g., Ethereum, Polygon, Arbitrum, Solana, Bitcoin) in a single click. 
-""")
+# --- Reference and Rebuild Info ---
+st.markdown(
+    """
+    <div style="margin-top: 20px; margin-bottom: 20px; font-size: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3178/3178287.png" alt="Reference" style="width:20px; height:20px;">
+            <span>Dashboard Reference: <a href="https://squid-chain-swaps.streamlit.app/" target="_blank">https://squid-chain-swaps.streamlit.app/</a></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz" style="width:25px; height:25px; border-radius: 50%;">
+            <span>Rebuilt by: <a href="https://x.com/0xeman_raz" target="_blank">Eman Raz</a></span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# --- Display Image ---
-#st.image("https://i.postimg.cc/s2HY308v/axelar.jpg", caption="", use_container_width=True)
-
-st.markdown("""
-https://www.axelar.network/
-
-https://www.squidrouter.com/
-
-https://x.com/axelar
-
-""")
-
-
+# --- Links with Logos ---
+st.markdown(
+    """
+    <div style="font-size: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://www.axelar.network/favicon.ico" alt="Axelar" style="width:20px; height:20px;">
+            <a href="https://www.axelar.network/" target="_blank">https://www.axelar.network/</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://www.squidrouter.com/favicon.ico" alt="Squid" style="width:20px; height:20px;">
+            <a href="https://www.squidrouter.com/" target="_blank">https://www.squidrouter.com/</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
+            <a href="https://x.com/axelar" target="_blank">https://x.com/axelar</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
+            <a href="https://x.com/squidrouter" target="_blank">https://x.com/squidrouter</a>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
