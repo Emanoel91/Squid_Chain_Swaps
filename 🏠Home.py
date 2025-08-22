@@ -64,12 +64,12 @@ st.markdown(
             <a href="https://www.squidrouter.com/" target="_blank">https://www.squidrouter.com/</a>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
-            <a href="https://x.com/axelar" target="_blank">https://x.com/axelar</a>
+            <img src="https://axelarscan.io/logos/logo.png" alt="X" style="width:20px; height:20px;">
+            <a href="https://x.com/axelar" target="_blank">Axelar  Account</a>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
-            <a href="https://x.com/squidrouter" target="_blank">https://x.com/squidrouter</a>
+            <img src="https://axelarscan.io/logos/accounts/squid.svg" alt="X" style="width:20px; height:20px;">
+            <a href="https://x.com/squidrouter" target="_blank">Squid X Account</a>
         </div>
     </div>
     """,
